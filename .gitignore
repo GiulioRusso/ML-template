@@ -1,2 +1,35 @@
-.env
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+
+# Experiments (outputs, not source)
+experiments/
+
+# Dataset — ignore raw data, keep templates
+data/*.csv
+data/*.parquet
+!data/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.claude/
+
+# macOS
 .DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Misc
+*.log
+.env

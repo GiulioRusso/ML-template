@@ -1,45 +1,106 @@
-# Machine Learning Boilerplate
+# Machine Learning Template with Scikit-learn
 
-Customizable notebook template for classical ML pipelines. Supports classification
-and regression out of the box. Starting point — not a definitive recipe.
+Notebook-based classical ML pipeline. Supports classification and regression out of the box. Follow this guide top-to-bottom to adapt it to your dataset.
 
 ---
 
-## Quickstart
+## Prerequisites
+
+- Python 3.10+
+- pip
+- (Optional but recommended) a virtual environment
+
+---
+
+## Installation
 
 ```bash
+# 1. Clone the repo
+git clone <your-repo-url>
+cd ML-template
+
+# 2. Create and activate a virtual environment
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+
+# 3. Install dependencies
 pip install -r requirements.txt
+```
+
+---
+
+## Smoke test — verify everything works
+
+Before touching any config, confirm the notebook runs end-to-end with the sample data:
+
+```bash
 jupyter notebook main.ipynb
 ```
 
-Place your dataset at `data/data.csv`, set the Config cell, run all cells.
+Open the notebook, run all cells (`Cell → Run All`). Expected: all cells execute without errors, evaluation plots appear in the output.
 
 ---
 
-## Customization map
+## Project layout
 
-Work through this list in order — everything else runs automatically.
+```
+data/
+  data.csv              your dataset goes here
 
-### 1 — Point at your data
-In the **Config** cell:
+experiments/            run outputs (auto-created, gitignored)
+
+main.ipynb              single entrypoint — all pipeline stages
+requirements.txt
+README.md
+```
+
+---
+
+## Experiment output
+
+When `SAVE_EXPERIMENT = True`, each run writes a timestamped directory:
+
+```
+experiments/2026-01-15_14-30-00/
+  config.txt            resolved config values
+  best_params.txt       best hyperparameters from grid search
+  metrics.txt           test metrics
+  plots/
+    confusion_matrix.png        (classification)
+    residuals.png               (regression)
+    feature_importance.png
+```
+
+---
+
+## Customisation guide
+
+Work through the config options **in this order** inside the **Config** cell of `main.ipynb`. Everything else runs automatically.
+
+### Step 1 — Point at your data
+
 ```python
 FILE_PATH  = "data/your_file.csv"
 TARGET_COL = "your_target_column"
 ```
 
-### 2 — Pick your task
+Place your CSV at the path above. `TARGET_COL` must match a column name in the file.
+
+### Step 2 — Pick your task
+
 ```python
 TASK = "classification"   # or "regression"
 ```
 
-### 3 — Pick a model
+This controls which models are available and which metrics are computed.
+
+### Step 3 — Pick a model
+
 ```python
-MODEL = "random_forest"   # see full list below
+MODEL = "random_forest"   # see table below
 ```
 
-Available models:
-
-| Key | Type | Algorithm |
+| Key | Task | Algorithm |
 |-----|------|-----------|
 | `random_forest` | classification | RandomForestClassifier |
 | `svc` | classification | SVC |
@@ -52,56 +113,54 @@ Available models:
 | `svr` | regression | SVR |
 | `gbr` | regression | GradientBoostingRegressor |
 
-To add a model, append an entry to the `MODELS` dict in the registry cell:
+To add a custom model, append an entry to the `MODELS` dict in the **Model Registry** cell:
+
 ```python
 "my_model": (MyEstimator(...), {"model__param": [v1, v2]}),
 ```
 
-### 4 — Configure preprocessing
+### Step 4 — Configure preprocessing
+
 ```python
-ENCODE_CATEGORICAL = True          # one-hot encode object/category columns
-REDUCTION = "none"                 # "none" | "pca" | "kbest"
-NUM_FEATURES = 10                  # kbest: number of features to keep
-VARIANCE = 0.95                    # pca: variance to retain
+ENCODE_CATEGORICAL = True     # one-hot encode object/category columns
+REDUCTION = "none"            # "none" | "pca" | "kbest"
+NUM_FEATURES = 10             # kbest: number of features to keep
+VARIANCE = 0.95               # pca: variance to retain
 ```
 
-### 5 — Tune evaluation settings
+### Step 5 — Tune evaluation settings
+
 ```python
-TRAIN_SIZE = 0.8
-NUM_FOLD   = 5
+TRAIN_SIZE  = 0.8    # fraction of data used for training
+NUM_FOLD    = 5      # cross-validation folds
 RANDOM_SEED = 42
 ```
 
-### 6 — Save results (optional)
+### Step 6 — Save results
+
 ```python
 SAVE_EXPERIMENT = True
 ```
 
-Writes to `experiments/<timestamp>/`:
-```
-config.txt          resolved config values
-best_params.txt     best hyperparameters from grid search
-metrics.txt         test metrics
-plots/              evaluation figures (confusion matrix / residuals / heatmap)
-```
+Set to `True` to write the experiment output (config, metrics, plots) to `experiments/<timestamp>/`.
 
 ---
 
-## Directory structure
+## Config reference
 
-```
-project/
-├── data/
-│   └── data.csv          your dataset goes here
-├── experiments/          run outputs (auto-created, gitignored)
-├── main.ipynb
-├── requirements.txt
-├── README.md
-└── plan.md               improvement plan and design rationale
-```
+All options live in the **Config** cell of `main.ipynb`. Quick summary:
 
----
-
-## License
-
-MIT
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FILE_PATH` | `"data/data.csv"` | Path to input CSV |
+| `TARGET_COL` | `"target"` | Name of the label column |
+| `TASK` | `"classification"` | `"classification"` or `"regression"` |
+| `MODEL` | `"random_forest"` | Key from the model registry |
+| `ENCODE_CATEGORICAL` | `True` | One-hot encode categorical columns |
+| `REDUCTION` | `"none"` | Feature reduction: `"none"`, `"pca"`, `"kbest"` |
+| `NUM_FEATURES` | `10` | Features to keep (kbest) |
+| `VARIANCE` | `0.95` | Variance to retain (pca) |
+| `TRAIN_SIZE` | `0.8` | Train/test split ratio |
+| `NUM_FOLD` | `5` | Cross-validation folds |
+| `RANDOM_SEED` | `42` | Global random seed |
+| `SAVE_EXPERIMENT` | `False` | Write output to `experiments/` |
